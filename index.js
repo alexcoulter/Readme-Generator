@@ -3,7 +3,7 @@ const fs = require("fs");
 const axios = require("axios");
 var email;
 var userImgLink;
-const token = 'a3eeef9c8c7f5b607eeefb5b2be9cbc210d1a71c';
+const token = '';
 const config = {
   headers: { 'Authorization':  `token ${token}` }
 }
