@@ -3,7 +3,7 @@ const fs = require("fs");
 const axios = require("axios");
 var email;
 var userImgLink;
-const token = '';
+const token = 'a3eeef9c8c7f5b607eeefb5b2be9cbc210d1a71c';
 const config = {
   headers: { 'Authorization':  `token ${token}` }
 }
@@ -68,8 +68,8 @@ inquirer
       .get(`https://api.github.com/users/${response.username}`, config)
       .then(function (res) {
 
-        console.log(res.data.email);
-        console.log(res.data.avatar_url);
+        // console.log(res.data.email);
+        // console.log(res.data.avatar_url);
         email = `* Email: ${res.data.email}  \n`;
         userImgLink = `<div align="center"><img  alt="user image" src= "${res.data.avatar_url}" width="200px" /></div>`;
         userImgLink = `* User Image: \n \n${userImgLink}`;
@@ -89,8 +89,8 @@ inquirer
 
         const title = response.projectTitle;
         const description = response.description;
-        console.log('response' + response.version);
-        console.log('license' + response.license);
+        // console.log('response' + response.version);
+        // console.log('license' + response.license);
         let license = `This project uses the ${response.license} license.  To find more information about this license follow this link:`;
         if (response.license === "Apache_2.0") {
           license = `${license} https://www.apache.org/licenses/LICENSE-2.0`;
@@ -109,7 +109,6 @@ inquirer
           versionBadge = " ";
         }
         else {
-          console.log(response.version);
           trimVersion = response.version.trim();
           var versionBadge = "![version #](https://img.shields.io/badge/version-" + trimVersion + "-blue)";
 
