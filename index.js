@@ -1,14 +1,17 @@
+//makes sure necessary npm packages can be used
 const inquirer = require("inquirer");
 const fs = require("fs");
 const axios = require("axios");
 var email;
 var userImgLink;
+//Github Token is us to access email from the Github API
+//I removed mine before pushing for security reasons
 const token = '';
 const config = {
-  headers: { 'Authorization':  `token ${token}` }
+  headers: { 'Authorization': `token ${token}` }
 }
 
-
+//Asks the user questions from the command line
 inquirer
   .prompt([
     {
@@ -62,35 +65,29 @@ inquirer
       name: "license",
     }
   ])
+  //waits for the user to answer questions then uses those answers to make a Github API call
   .then(function (response) {
-
     axios
       .get(`https://api.github.com/users/${response.username}`, config)
       .then(function (res) {
 
-        // console.log(res.data.email);
-        // console.log(res.data.avatar_url);
         email = `* Email: ${res.data.email}  \n`;
         userImgLink = `<div align="center"><img  alt="user image" src= "${res.data.avatar_url}" width="200px" /></div>`;
         userImgLink = `* User Image: \n \n${userImgLink}`;
-        
       })
-      
+      //Used for error handling
       .catch(function (error) {
         console.log("couldn't find that username on Github!");
         // console.log(error);
-         userImgLink = "";
-         email = "";
-
+        userImgLink = "";
+        email = "";
       })
-
+      //waits for the api call to finish and then formats the responses needed to write readme file
       .then(function () {
-
-
         const title = response.projectTitle;
         const description = response.description;
-        // console.log('response' + response.version);
-        // console.log('license' + response.license);
+
+        //Creates links depending on which license was selected
         let license = `This project uses the ${response.license} license.  To find more information about this license follow this link:`;
         if (response.license === "Apache_2.0") {
           license = `${license} https://www.apache.org/licenses/LICENSE-2.0`;
@@ -104,35 +101,36 @@ inquirer
         else if (response.license === "None") {
           license = "This project has not been licensed."
         }
-
-        if (response.version.length === 0 || !response.version.trim()) {
-          versionBadge = " ";
-        }
-        else {
-          trimVersion = response.version.trim();
-          var versionBadge = "![version #](https://img.shields.io/badge/version-" + trimVersion + "-blue)";
-
-        }
+        //creates license badge
         if (response.license) {
-          var licenseBadge = "![license type](https://img.shields.io/badge/license-" + response.license + "-yellow)";
+          var licenseBadge = `[![license type](https://img.shields.io/badge/License-${response.license}-yellow)](#License)`;
         }
         else {
           licenseBadge = "";
         }
+        //if the user inputs nothing or blank spaces then we don't create a badge for version #
+        if (response.version.length === 0 || !response.version.trim()) {
+          versionBadge = " ";
+        }
+        //Else Creates version badge
+        else {
+          trimVersion = response.version.trim();
+          var versionBadge = "![version #](https://img.shields.io/badge/Version-" + trimVersion + "-blue)";
+        }
 
-
+        //Creates a readme.md with all of our relevant information
         const stream = fs.createWriteStream("README.md");
         stream.once('open', function (fd) {
           stream.write(`# ${title} \n`);
-          stream.write(`${licenseBadge} \t ${versionBadge} \n`);
+          stream.write(`${licenseBadge} \t ${versionBadge} \t ![Node.js](https://img.shields.io/badge/Built_with-Node.js-green) \n`);
           stream.write(`## Table of Contents  \n***\n  `);
-          stream.write(`* [Link to Description](#Description)\n`);
-          stream.write(`* [Link to Installation](#Installation)\n`);
-          stream.write(`* [Link to Usage](#Usage)\n`);
-          stream.write(`* [Link to Testing](#Testing)\n`);
-          stream.write(`* [Link to License](#License)\n`);
-          stream.write(`* [Link to Contributing](#Contributing)\n`);
-          stream.write(`* [Link to Contact](#Contact)\n`);
+          stream.write(`* [Description](#Description)\n`);
+          stream.write(`* [Installation](#Installation)\n`);
+          stream.write(`* [Usage](#Usage)\n`);
+          stream.write(`* [Testing](#Testing)\n`);
+          stream.write(`* [License](#License)\n`);
+          stream.write(`* [Contributing](#Contributing)\n`);
+          stream.write(`* [Questions](#Questions)\n`);
           stream.write(`## Description  \n***\n  `);
           stream.write(`* ${description} \n \n`);
           stream.write(`## Installation  \n***\n  `);
@@ -145,16 +143,15 @@ inquirer
           stream.write(`* ${license} \n \n`)
           stream.write(`## Contributing  \n***\n  `);
           stream.write(`* ${response.contributing} \n \n`)
-          stream.write(`## Contact  \n***\n  `);
-          stream.write(`* Username: ${response.username} \n `)
+          stream.write(`## Questions  \n***\n  `);
+          stream.write(`If you have any questions feel free to contact me: \n\n  `);
+          stream.write(`* Github Username: ${response.username} \n `)
+          stream.write(`* Github Link: https://github.com/${response.username} \n `)
           stream.write(`${email}`);
           stream.write(`${userImgLink}`);
           stream.end();
           console.log("Readme.md for your project has been created!");
         });
-
-
       })
-
   });
 
